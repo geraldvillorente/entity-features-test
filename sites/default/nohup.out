@@ -1,0 +1,4 @@
+
+** (gedit:14126): WARNING **: Could not load Gedit repository: Typelib file for namespace 'GtkSource', version '3.0' not found
+
+(gedit:14126): IBUS-WARNING **: The owner of /home/gerald/.config/ibus/bus is not root!

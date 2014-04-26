@@ -1,0 +1,357 @@
+<?php
+/**
+ * @file
+ * Payroll module file.
+ */
+
+
+/**
+ * Implements hook_init().
+ */
+function payroll_init() {
+  drupal_add_js(drupal_get_path('module', 'payroll') . '/js/payroll.js', 'file');
+  drupal_add_js(drupal_get_path('module', 'payroll') . '/js/validate-value.js', 'file');
+  drupal_add_css(drupal_get_path('module', 'payroll') . '/css/payroll.css');
+}
+
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Adds two fields to the node form, second only appears after first is enabled.
+ */
+function payroll_form_node_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id === 'faculty_node_form' || $form_id === 'employee_node_form') {
+    $node = $form['#node'];
+    $form['container'] = array();
+    $form['bangus_checkbox'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Bangus'),
+      '#description' => t('Enable to show the Bangus price field.'),
+      '#default_value' => $node->payroll['bangus_checkbox'],
+      '#ajax' => array(
+        'callback' => 'payroll_bangus_form_node_callback',
+        'wrapper' => 'payroll-bangus-form-node',
+        'effect' => 'fade',
+      ),
+      '#weight' => 0,
+      '#prefix' => '<div id="payroll-bangus-form-node-checkbox">',
+      '#suffix' => '</div>',
+    );
+    $form['sugpo_checkbox'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Sugpo'),
+      '#description' => t('Enable to show Sugpo price field.'),
+      '#default_value' => $node->payroll['sugpo_checkbox'],
+      '#ajax' => array(
+        'callback' => 'payroll_sugpo_form_node_callback',
+        'wrapper' => 'payroll-sugpo-form-node',
+        'effect' => 'fade',
+      ),
+      '#weight' => 1,
+      '#prefix' => '<div id="payroll-sugpo-form-node-checkbox">',
+      '#suffix' => '</div>',
+    );
+    $form['tshirt_checkbox'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('T-Shirt'),
+      '#description' => t('Enable to show T-Shirt price field.'),
+      '#default_value' => $node->payroll['tshirt_checkbox'],
+      '#ajax' => array(
+        'callback' => 'payroll_tshirt_form_node_callback',
+        'wrapper' => 'payroll-tshirt-form-node',
+        'effect' => 'fade',
+      ),
+      '#weight' => 2,
+      '#prefix' => '<div id="payroll-tshirt-form-node-checkbox">',
+      '#suffix' => '</div>',
+    );
+    $form['misc_checkbox'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Misc'),
+      '#description' => t('Enable to show Misc price field.'),
+      '#default_value' => $node->payroll['misc_checkbox'],
+      '#ajax' => array(
+        'callback' => 'payroll_misc_form_node_callback',
+        'wrapper' => 'payroll-misc-form-node',
+        'effect' => 'fade',
+      ),
+      '#weight' => 3,
+      '#prefix' => '<div id="payroll-misc-form-node-checkbox">',
+      '#suffix' => '</div>',
+    );
+    $form['wrapper'] = array(
+      '#type' => 'container',
+      '#attributes' => array(
+        'id' => array('additional-utang-container'),
+      ),
+      '#prefix' => '<div id="payroll-form-node">',
+      '#suffix' => '</div>',
+    );
+    $form['wrapper']['bangus_container'] = array(
+      '#prefix' => '<div id="payroll-bangus-form-node">',
+      '#suffix' => '</div>',
+    );
+    $form['wrapper']['sugpo_container'] = array(
+      '#prefix' => '<div id="payroll-sugpo-form-node">',
+      '#suffix' => '</div>',
+    );
+    $form['wrapper']['tshirt_container'] = array(
+      '#prefix' => '<div id="payroll-tshirt-form-node">',
+      '#suffix' => '</div>',
+    );
+    $form['wrapper']['misc_container'] = array(
+      '#prefix' => '<div id="payroll-misc-form-node">',
+      '#suffix' => '</div>',
+    );
+
+    $form['#group_children']['wrapper'] = 'group_field_addl_ded';
+    $form['#group_children']['bangus_checkbox'] = 'group_field_addl_ded';
+    $form['#group_children']['sugpo_checkbox'] = 'group_field_addl_ded';
+    $form['#group_children']['tshirt_checkbox'] = 'group_field_addl_ded';
+    $form['#group_children']['misc_checkbox'] = 'group_field_addl_ded';
+
+    if (!empty($form_state['values']['bangus_checkbox']) && $form_state['values']['bangus_checkbox'] == 1
+        || empty($form_state['values']) && $node->payroll['bangus_checkbox']) {
+
+      $form['wrapper']['bangus_container']['bangus_textfield'] = array(
+        '#type' => 'textfield',
+        '#title' => t('BANGUS'),
+        '#description' => t('Bangus price field.'),
+        '#default_value' => empty($form_state['values']['bangus_textfield']) ? $node->payroll['bangus_textfield'] : $form_state['values']['bangus_textfield'],
+      );
+    }
+    if (!empty($form_state['values']['sugpo_checkbox']) && $form_state['values']['sugpo_checkbox'] == 1
+        || empty($form_state['values']) && $node->payroll['sugpo_checkbox']) {
+
+      $form['wrapper']['sugpo_container']['sugpo_textfield'] = array(
+        '#type' => 'textfield',
+        '#title' => t('SUGPO'),
+        '#description' => t('Sugpo price field.'),
+        '#default_value' => empty($form_state['values']['sugpo_textfield']) ? $node->payroll['sugpo_textfield'] : $form_state['values']['sugpo_textfield'],
+      );
+    }
+    if (!empty($form_state['values']['tshirt_checkbox']) && $form_state['values']['tshirt_checkbox'] == 1
+        || empty($form_state['values']) && $node->payroll['tshirt_checkbox']) {
+
+      $form['wrapper']['tshirt_container']['tshirt_textfield'] = array(
+        '#type' => 'textfield',
+        '#title' => t('T-SHIRT'),
+        '#description' => t('T-Shirt price field.'),
+        '#default_value' => empty($form_state['values']['tshirt_textfield']) ? $node->payroll['tshirt_textfield'] : $form_state['values']['tshirt_textfield'],
+      );
+    }
+    if (!empty($form_state['values']['misc_checkbox']) && $form_state['values']['misc_checkbox'] == 1
+        || empty($form_state['values']) && $node->payroll['misc_checkbox']) {
+
+      $form['wrapper']['misc_container']['misc_textfield'] = array(
+        '#type' => 'textfield',
+        '#title' => t('MISC'),
+        '#description' => t('Misc deductions.'),
+        '#default_value' => empty($form_state['values']['misc_textfield']) ? $node->payroll['misc_textfield'] : $form_state['values']['misc_textfield'],
+      );
+    }
+
+    unset($form['field_placeholder']);
+    // Overrides.
+    $form['title']['#title'] = t('NAME');
+  }
+}
+
+
+/**
+ * Bangus checkbox ajax callback.
+ */
+function payroll_bangus_form_node_callback($form, $form_state) {
+  return $form['wrapper']['bangus_container'];
+}
+
+
+/**
+ * Sugpo checkbox ajax callback.
+ */
+function payroll_sugpo_form_node_callback($form, $form_state) {
+  return $form['wrapper']['sugpo_container'];
+}
+
+
+/**
+ * T-Shirt checkbox ajax callback.
+ */
+function payroll_tshirt_form_node_callback($form, $form_state) {
+  return $form['wrapper']['tshirt_container'];
+}
+
+/**
+ * Misc checkbox ajax callback.
+ */
+function payroll_misc_form_node_callback($form, $form_state) {
+  return $form['wrapper']['misc_container'];
+}
+
+
+/**
+ * Implements hook_node_submit().
+ * @see payroll_form_node_form_alter()
+ */
+function payroll_node_submit($node, $form, &$form_state) {
+  if ($node->type === 'employee' || $node->type === 'faculty') {
+    $values = $form_state['values'];
+    // Move the new data into the node object.
+    $node->payroll['bangus_checkbox'] = $values['bangus_checkbox'];
+    // Depending on the state of payroll_1; it may not exist.
+    $node->payroll['bangus_textfield'] = isset($values['bangus_textfield']) ? $values['bangus_textfield'] : 0;
+
+    $node->payroll['sugpo_checkbox'] = $values['sugpo_checkbox'];
+    $node->payroll['sugpo_textfield'] = isset($values['sugpo_textfield']) ? $values['sugpo_textfield'] : 0;
+
+    $node->payroll['tshirt_checkbox'] = $values['tshirt_checkbox'];
+    $node->payroll['tshirt_textfield'] = isset($values['tshirt_textfield']) ? $values['tshirt_textfield'] : 0;
+
+    $node->payroll['misc_checkbox'] = $values['misc_checkbox'];
+    $node->payroll['misc_textfield'] = isset($values['misc_textfield']) ? $values['misc_textfield'] : 0;
+  }
+}
+
+
+/**
+ * Implements hook_node_prepare().
+ *
+ * @see payroll_form_node_form_alter()
+ */
+function payroll_node_prepare($node) {
+  if ($node->type === 'employee' || $node->type === 'faculty') {
+    if (empty($node->payroll)) {
+      // Set default values, since this only runs when adding a new node.
+      $node->payroll['bangus_checkbox'] = 0;
+      $node->payroll['bangus_texfield'] = 0;
+      $node->payroll['sugpo_checkbox'] = 0;
+      $node->payroll['sugpo_textfield'] = 0;
+      $node->payroll['tshirt_checkbox'] = 0;
+      $node->payroll['tshirt_textfield'] = 0;
+      $node->payroll['misc_checkbox'] = 0;
+      $node->payroll['misc_textfield'] = 0;
+    }
+  }
+}
+
+
+/**
+ * Implements hook_node_load().
+ *
+ * @see payroll_form_node_form_alter()
+ */
+function payroll_node_load($nodes, $types) {
+  $result = db_query('SELECT * FROM {payroll_node_form_alter} WHERE nid IN(:nids)', array(':nids' => array_keys($nodes)))->fetchAllAssoc('nid');
+
+  foreach ($nodes as &$node) {
+    if ($node->type === 'employee' || $node->type === 'faculty') {
+      $node->payroll['bangus_checkbox']
+        = isset($result[$node->nid]->bangus_checkbox) ?
+        $result[$node->nid]->bangus_checkbox : 0;
+      $node->payroll['bangus_textfield']
+        = isset($result[$node->nid]->bangus_textfield) ?
+        $result[$node->nid]->bangus_textfield : 0;
+      $node->payroll['sugpo_checkbox']
+        = isset($result[$node->nid]->sugpo_checkbox) ?
+        $result[$node->nid]->sugpo_checkbox : '';
+      $node->payroll['sugpo_textfield']
+        = isset($result[$node->nid]->sugpo_textfield) ?
+        $result[$node->nid]->sugpo_textfield : 0;
+      $node->payroll['tshirt_checkbox']
+        = isset($result[$node->nid]->tshirt_checkbox) ?
+        $result[$node->nid]->tshirt_checkbox : 0;
+      $node->payroll['tshirt_textfield']
+        = isset($result[$node->nid]->tshirt_textfield) ?
+        $result[$node->nid]->tshirt_textfield : 0;
+      $node->payroll['misc_checkbox']
+        = isset($result[$node->nid]->misc_checkbox) ?
+        $result[$node->nid]->misc_checkbox : 0;
+      $node->payroll['misc_textfield']
+        = isset($result[$node->nid]->misc_textfield) ?
+        $result[$node->nid]->misc_textfield : 0;
+    }
+  }
+}
+
+
+/**
+ * Implements hook_node_insert().
+ *
+ * @see payroll_form_node_form_alter()
+ */
+function payroll_node_insert($node) {
+  if ($node->type === 'employee' || $node->type === 'faculty') {
+    if (isset($node->payroll)) {
+      db_insert('payroll_node_form_alter')
+        ->fields(array(
+          'nid' => $node->nid,
+          'bangus_checkbox' => $node->payroll['bangus_checkbox'],
+          'bangus_textfield' => $node->payroll['bangus_textfield'],
+          'sugpo_checkbox' => $node->payroll['sugpo_checkbox'],
+          'sugpo_textfield' => $node->payroll['sugpo_textfield'],
+          'tshirt_checkbox' => $node->payroll['tshirt_checkbox'],
+          'tshirt_textfield' => $node->payroll['tshirt_textfield'],
+          'misc_checkbox' => $node->payroll['misc_checkbox'],
+          'misc_textfield' => $node->payroll['misc_textfield'],
+        ))
+        ->execute();
+    }
+  }
+}
+
+
+/**
+ * Implements hook_node_update().
+ * @see payroll_form_node_form_alter()
+ */
+function payroll_node_update($node) {
+  if ($node->type === 'employee' || $node->type === 'faculty') {
+    if (db_select('payroll_node_form_alter', 'a')->fields('a')->condition('nid', $node->nid, '=')->execute()->fetchAssoc()) {
+      db_update('payroll_node_form_alter')
+        ->fields(array(
+          'bangus_checkbox' => $node->payroll['bangus_checkbox'],
+          'bangus_textfield' => $node->payroll['bangus_textfield'],
+          'sugpo_checkbox' => $node->payroll['sugpo_checkbox'],
+          'sugpo_textfield' => $node->payroll['sugpo_textfield'],
+          'tshirt_checkbox' => $node->payroll['tshirt_checkbox'],
+          'tshirt_textfield' => $node->payroll['tshirt_textfield'],
+          'misc_checkbox' => $node->payroll['misc_checkbox'],
+          'misc_textfield' => $node->payroll['misc_textfield'],
+        ))
+        ->condition('nid', $node->nid)
+        ->execute();
+    }
+    else {
+      // Cleaner than doing it again.
+      payroll_node_insert($node);
+    }
+  }
+}
+
+
+/**
+ * Implements hook_node_delete().
+ * @see payroll_form_node_form_alter()
+ */
+function payroll_node_delete($node) {
+  if ($node->type === 'employee' || $node->type === 'faculty') {
+    db_delete('payroll_node_form_alter')
+      ->condition('nid', $node->nid)
+      ->execute();
+  }
+}
+
+
+/**
+* Implements hook_views_api().
+*
+* Enabling using templates inside module
+*/
+function payroll_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'payroll'),
+    'template path' => drupal_get_path('module', 'payroll') . '/templates',
+  );
+}

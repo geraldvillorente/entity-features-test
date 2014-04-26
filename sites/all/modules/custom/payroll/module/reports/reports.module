@@ -1,0 +1,119 @@
+<?php
+/**
+ * @file
+ * Reports module file.
+ */
+
+
+/**
+ * Implements hook_menu().
+ */
+function reports_menu() {
+  $items = array();
+
+  $items['generate-report'] = array(
+    'title' => 'Generate Reports',
+    'description' => 'Generate periodic reports.',
+    'page callback' => 'reports_generate_reports_callback',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer payroll report'),
+  );
+
+  $items['admin/config/content/header-info'] = array(
+    'title' => 'Configure Header Info',
+    'description' => 'Configuration form for Payroll Header information.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('reports_header_info_form'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+
+/**
+ * Callback for generate reports.
+ */
+function reports_generate_reports_callback() {
+  return "Test";
+}
+
+
+/**
+ * Implements hook_permission().
+ *
+ * @return array
+ */
+function reports_permission() {
+  return array(
+    'administer payroll report' => array(
+      'title' => t('Payroll Report'),
+      'description' => t('Allow user to administer payroll reporting.'),
+    )
+  );
+}
+
+
+/**
+ * Page callback: Current posts settings
+ *
+ * @see current_posts_menu()
+ */
+function reports_header_info_form($form, &$form_state) {
+  $form['asu_header_info'] = array(
+    '#type' => 'text_format',
+    '#title' => t('Header information for reports.'),
+    '#default_value' => reports_get_header_value(),
+    '#description' => t('Put the correct header information.'),
+    '#format' => 'full_html'
+  );
+  return system_settings_form($form);
+}
+
+
+/**
+ * Get the header value.
+ */
+function reports_get_header_value() {
+  $info = variable_get('asu_header_info', reports_header_info_default());
+  return $info['value'];
+}
+
+
+/**
+ * Implements validation from the Form API.
+ *
+ * @param $form
+ *   A structured array containing the elements and properties of the form.
+ * @param $form_state
+ *   An array that stores information about the form's current state
+ *   during processing.
+ */
+function reports_header_info_form_validate($form, &$form_state){
+  $header_info = $form_state['values']['asu_header_info']['value'];
+  $header_info = strip_tags($header_info);
+  if (empty($header_info)) {
+    form_set_error('asu_header_info', t('Header should not be empty.'));
+  }
+}
+
+
+/**
+ * Define the default value for header info textarea.
+ */
+function reports_header_info_default() {
+  $output = "<div class='header-wrapper'>";
+    $output .= "<div class='top-header'>";
+    $output .= "Republic of the Philippines";
+    $output .= "</div>";
+    $output .= "<div class='middle-header'>";
+    $output .= "Aklan State University";
+    $output .= "</div>";
+    $output .= "<div class='bottom-header'>";
+    $output .= "ASU CMFS";
+    $output .= "</div>";
+  $output .= "</div>";
+
+  return $output;
+}

@@ -1,0 +1,40 @@
+#employee-node-form div input[type="text"],
+#faculty-node-form div input[type="text"] {
+  height: 28px;
+  width: 48%;
+}
+
+.group-deductions .fieldset-wrapper .field-type-number-decimal:nth-child(even) {
+  float: right;
+  width: 50%;
+}
+
+.group-deductions .fieldset-wrapper .field-type-number-decimal:nth-child(odd) {
+  float: left;
+  width: 50%;
+}
+
+.group-deductions .fieldset-wrapper fieldset {
+  width: 100%;
+}
+
+.group-deductions .fieldset-wrapper fieldset .field-type-number-decimal:nth-child(even) {
+  float: right;
+  width: 50%;
+}
+
+.group-deductions .fieldset-wrapper fieldset .field-type-number-decimal:nth-child(odd) {
+  float: left;
+  width: 50%;
+}
+
+html.js .field-type-entityreference input.form-autocomplete {
+  background-position: 100% 12px;
+}
+
+.view-employee-general-payroll p {
+  line-height: 12px;
+  margin: 0 0 4px;
+  text-align: center;
+  text-transform: uppercase;
+}

@@ -1,0 +1,98 @@
+<?php
+
+/**
+ * @file
+ * Payroll install file schema for payroll_form_node_form_alter()
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function payroll_schema() {
+  $schema['payroll_node_form_alter'] = array(
+    'description' => 'Stores example settings for nodes.',
+    'fields' => array(
+      'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The {node}.nid to store settings.',
+      ),
+      'bangus_checkbox' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Bangus price checkbox.',
+      ),
+      'bangus_textfield' => array(
+        'type' => 'int',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => 0,
+        'description' => 'Sugpo price textfield.',
+      ),
+      'sugpo_checkbox' => array(
+        'type' => 'int',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => 0,
+        'description' => 'Sugpo price checkbox.',
+      ),
+      'sugpo_textfield' => array(
+        'type' => 'int',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => 0,
+        'description' => 'Sugpo price textfield.',
+      ),
+      'tshirt_checkbox' => array(
+        'type' => 'int',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => 0,
+        'description' => 'T-Shirt price checkbox.',
+      ),
+      'tshirt_textfield' => array(
+        'type' => 'int',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => 0,
+        'description' => 'T-Shirt price textfield.',
+      ),
+      'misc_checkbox' => array(
+        'type' => 'int',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => 0,
+        'description' => 'Misc price checkbox.',
+      ),
+      'misc_textfield' => array(
+        'type' => 'int',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => 0,
+        'description' => 'Misc price textfield.',
+      ),
+    ),
+    'primary key' => array('nid'),
+    'foreign keys' => array(
+      'dnv_node' => array(
+        'table' => 'node',
+        'columns' => array('nid' => 'nid'),
+      ),
+    ),
+  );
+  return $schema;
+}
+
+/**
+ * Add the new payroll_node_form_alter table.
+ */
+function payroll_update_7100() {
+  if (!db_table_exists('payroll_node_form_alter')) {
+    $schema = payroll_schema();
+    db_create_table('payroll_node_form_alter', $schema['payroll_node_form_alter']);
+    return st('Created table payroll_node_form_alter');
+  }
+}

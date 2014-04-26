@@ -1,0 +1,5 @@
+name = Payroll
+description = Payroll core functionality.
+package = Custom
+core = 7.x
+
