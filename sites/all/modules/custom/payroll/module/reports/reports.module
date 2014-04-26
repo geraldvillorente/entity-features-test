@@ -28,6 +28,15 @@ function reports_menu() {
     'type' => MENU_NORMAL_ITEM,
   );
 
+  $items['admin/config/content/acknowledge'] = array(
+    'title' => 'Configure Acknowledge Info',
+    'description' => 'Configuration form for Payroll Acknowledge information.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('reports_acknowledge_info_form'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
   return $items;
 }
 
@@ -73,11 +82,38 @@ function reports_header_info_form($form, &$form_state) {
 
 
 /**
+ * Page callback: Payroll info.
+ *
+ * @see current_posts_menu()
+ */
+function reports_acknowledge_info_form($form, &$form_state) {
+  $form['asu_acknowledge_info'] = array(
+    '#type' => 'text_format',
+    '#title' => t('Acknowledgment information for reports.'),
+    '#default_value' => reports_get_acknowledge_value(),
+    '#description' => t('Put the correct acknowledgement information.'),
+    '#format' => 'full_html'
+  );
+  return system_settings_form($form);
+}
+
+
+/**
  * Get the header value.
  */
 function reports_get_header_value() {
   $info = variable_get('asu_header_info', reports_header_info_default());
   return $info['value'];
+}
+
+
+/**
+ * Get the header value.
+ */
+function reports_get_acknowledge_value() {
+  $info = variable_get('acknowledge_info', reports_acknowledge_info_default());
+  dpm($info);
+  return $info;
 }
 
 
@@ -100,6 +136,24 @@ function reports_header_info_form_validate($form, &$form_state){
 
 
 /**
+ * Implements validation from the Form API.
+ *
+ * @param $form
+ *   A structured array containing the elements and properties of the form.
+ * @param $form_state
+ *   An array that stores information about the form's current state
+ *   during processing.
+ */
+function reports_acknowledge_info_form_validate($form, &$form_state){
+  $header_info = $form_state['values']['asu_acknowledge_info']['value'];
+  $header_info = strip_tags($header_info);
+  if (empty($header_info)) {
+    form_set_error('asu_acknowledge_info', t('Acknowledgment should not be empty.'));
+  }
+}
+
+
+/**
  * Define the default value for header info textarea.
  */
 function reports_header_info_default() {
@@ -115,5 +169,14 @@ function reports_header_info_default() {
     $output .= "</div>";
   $output .= "</div>";
 
+  return $output;
+}
+
+
+/**
+ * Define the default value for header info textarea.
+ */
+function reports_acknowledge_info_default() {
+  $output = "Aklan state university";
   return $output;
 }
